@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Experience Immersion Matrix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0a0c10;
+      color: #cbd5e1;
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+    }
+
+    ::selection { background: #f43f5e; color: #fff; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: fixed;
+      left: 0; top: 0;
+      height: 100%;
+      width: 80px;
+      background: #12151c;
+      border-right: 1px solid #1e293b;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 0;
+      gap: 2rem;
+      z-index: 50;
+    }
+
+    .logo {
+      width: 50px; height: 50px;
+      background: linear-gradient(135deg, #f43f5e, #9333ea);
+      border-radius: 1rem;
+      box-shadow: 0 4px 20px rgba(244,63,94,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .sidebar nav { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    .nav-btn {
+      position: relative;
+      width: 52px; height: 52px;
+      border-radius: 0.75rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.25s, color 0.25s;
+    }
+    .nav-btn:hover  { color: #cbd5e1; background: #1e293b; }
+    .nav-btn.active { color: #fff;    background: #1e293b; }
+
+    .nav-dot {
+      position: absolute;
+      right: 6px; top: 6px;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      display: none;
+    }
+    .nav-btn.active .nav-dot { display: block; }
+
+    .dot-slate  { background: #64748b; }
+    .dot-amber  { background: #f59e0b; }
+    .dot-rose   { background: #f43f5e; }
+    .dot-emerald{ background: #10b981; }
+    .dot-blue   { background: #3b82f6; }
+
+    .nav-tooltip {
+      position: absolute;
+      left: calc(100% + 14px);
+      padding: 3px 10px;
+      background: #1e293b;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+      color: #cbd5e1;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+      z-index: 99;
+    }
+    .nav-btn:hover .nav-tooltip { opacity: 1; }
+
+    /* ── LAYOUT ── */
+    main { padding: 3rem 2rem 3rem 112px; }
+
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 2rem;
+      margin-bottom: 5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 1100px) {
+      .layout-grid { grid-template-columns: 1fr; }
+      .panel { position: static !important; }
+    }
+    @media (max-width: 680px) {
+      main   { padding-left: 96px; padding-right: 1rem; }
+      footer { padding-left: 96px; }
+    }
+
+    /* ── HEADER ── */
+    .tag-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 3px 14px;
+      background: rgba(30,41,59,0.5);
+      border: 1px solid #334155;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #94a3b8;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      background: linear-gradient(to right, #fff 20%, #94a3b8 60%, #475569);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+    }
+
+    .subtitle {
+      color: #64748b;
+      font-size: 1.05rem;
+      line-height: 1.7;
+      max-width: 40rem;
+      margin-bottom: 3rem;
+    }
+
+    /* ── CARDS ── */
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .card {
+      position: relative;
+      background: #161a23;
+      border: 1px solid #1e293b;
+      padding: 1.4rem;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.35s, transform 0.35s, box-shadow 0.35s;
+    }
+    .card:hover {
+      border-color: #334155;
+      transform: translateY(-4px);
+      box-shadow: 0 20px 48px rgba(0,0,0,0.55);
+    }
+    .card.selected {
+      border-color: rgba(244,63,94,0.4);
+      box-shadow: 0 0 0 2px rgba(244,63,94,0.25);
+    }
+
+    .card-glow {
+      position: absolute;
+      top: 0; right: 0;
+      width: 8rem; height: 8rem;
+      opacity: 0.05;
+      border-radius: 0 1.5rem 0 0;
+      pointer-events: none;
+      transition: opacity 0.35s;
+    }
+    .card:hover .card-glow { opacity: 0.13; }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.2rem;
+    }
+
+    .realm-badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #fff;
+    }
+    .realm-badge.aesthetic     { background: #f59e0b; }
+    .realm-badge.escapist      { background: #f43f5e; }
+    .realm-badge.educational   { background: #10b981; }
+    .realm-badge.entertainment { background: #3b82f6; }
+
+    .ext-link {
+      width: 32px; height: 32px;
+      background: #1e293b;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+      flex-shrink: 0;
+    }
+    .ext-link:hover { background: #334155; color: #fff; }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.45rem;
+      line-height: 1.25;
+      transition: color 0.2s;
+    }
+    .card:hover .card-title { color: #f43f5e; }
+
+    .card-type {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 1rem;
+    }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      font-size: 9px;
+      font-weight: 700;
+      color: #475569;
+      background: #0f1117;
+      padding: 3px 8px;
+      border-radius: 5px;
+      border: 1px solid #1e293b;
+    }
+
+    /* ── RIGHT PANEL ── */
+    .panel-col { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    .panel {
+      background: #12151c;
+      border: 1px solid #1e293b;
+      border-radius: 1.5rem;
+      padding: 1.75rem;
+      position: sticky;
+      top: 2rem;
+      min-height: 300px;
+    }
+
+    .panel-placeholder {
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      opacity: 0.3;
+      gap: 1rem;
+    }
+    .panel-placeholder p {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      line-height: 1.8;
+    }
+
+    .panel-content { display: none; }
+    .panel-content.visible {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(6px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .icon-wrap {
+      width: 52px; height: 52px;
+      border-radius: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .icon-wrap.aesthetic     { background: #f59e0b; }
+    .icon-wrap.escapist      { background: #f43f5e; }
+    .icon-wrap.educational   { background: #10b981; }
+    .icon-wrap.entertainment { background: #3b82f6; }
+
+    .panel-title { font-size: 1.3rem; font-weight: 700; color: #fff; line-height: 1.2; }
+    .panel-realm {
+      font-size: 10px; font-weight: 700; color: #475569;
+      text-transform: uppercase; letter-spacing: 0.1em; margin-top: 3px;
+    }
+
+    .analysis-box {
+      background: rgba(15,17,23,0.6);
+      padding: 1rem;
+      border-radius: 1rem;
+      border: 1px solid #1e293b;
+      margin-bottom: 1.2rem;
+    }
+
+    .label-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #475569;
+      margin-bottom: 0.5rem;
+    }
+
+    .analysis-text {
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      line-height: 1.65;
+      font-style: italic;
+    }
+
+    .engine-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #475569;
+      margin-bottom: 0.4rem;
+    }
+    .engine-value {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 1.4rem;
+    }
+
+    .open-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 0.9rem;
+      background: #fff;
+      color: #000;
+      font-weight: 900;
+      font-size: 0.8rem;
+      font-family: 'Syne', sans-serif;
+      letter-spacing: 0.05em;
+      border-radius: 1rem;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+    }
+    .open-btn:hover { background: #f43f5e; color: #fff; }
+
+    /* ── METHOD BOX ── */
+    .method-box {
+      background: linear-gradient(135deg, #0f1117, #12151c);
+      border: 1px solid #1e293b;
+      border-radius: 1.5rem;
+      padding: 1.4rem;
+    }
+    .method-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+    .method-item {
+      display: flex;
+      gap: 10px;
+      font-size: 11px;
+      color: #64748b;
+      margin-bottom: 0.75rem;
+      line-height: 1.5;
+    }
+    .method-item:last-child { margin-bottom: 0; }
+    .method-num { color: #f43f5e; font-weight: 700; flex-shrink: 0; }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 1.75rem 2rem 1.75rem 112px;
+      border-top: 1px solid #1e293b;
+      color: #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .footer-right { display: flex; gap: 1.5rem; }
+    .accent { color: #f43f5e; }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+    .pulse { animation: pulse 2s ease-in-out infinite; }
+
+    svg { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="logo">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+  </div>
+  <nav>
+    <button class="nav-btn active" data-filter="all">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+      <div class="nav-dot dot-slate"></div>
+      <span class="nav-tooltip">All Projects</span>
+    </button>
+    <button class="nav-btn" data-filter="aesthetic">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      <div class="nav-dot dot-amber"></div>
+      <span class="nav-tooltip">Aesthetic</span>
+    </button>
+    <button class="nav-btn" data-filter="escapist">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <div class="nav-dot dot-rose"></div>
+      <span class="nav-tooltip">Escapist</span>
+    </button>
+    <button class="nav-btn" data-filter="educational">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-1.14"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-1.14"/></svg>
+      <div class="nav-dot dot-emerald"></div>
+      <span class="nav-tooltip">Educational</span>
+    </button>
+    <button class="nav-btn" data-filter="entertainment">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <div class="nav-dot dot-blue"></div>
+      <span class="nav-tooltip">Entertainment</span>
+    </button>
+  </nav>
+</div>
+
+<!-- Main -->
+<main>
+  <header>
+    <div class="tag-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      SYSTEM SYNTHESIS V.2.0
+    </div>
+    <h1>Experience Immersion Matrix</h1>
+    <p class="subtitle">
+      Mapping the 4 experience realms of <strong style="color:#fff;">Pine &amp; Gilmore</strong> onto the immersion mechanics of <strong style="color:#fff;">Ermi &amp; Mäyrä</strong>.
+    </p>
+  </header>
+
+  <div class="layout-grid">
+    <div class="grid-cards" id="cards-grid"></div>
+
+    <div class="panel-col">
+      <div class="panel">
+        <div class="panel-placeholder" id="panel-placeholder">
+          <svg class="pulse" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+          <p>Select a case study<br/>to analyze</p>
+        </div>
+        <div class="panel-content" id="panel-content"></div>
+      </div>
+
+      <div class="method-box">
+        <div class="method-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          Methodology
+        </div>
+        <div class="method-item"><span class="method-num">01</span><span><strong>Sensory:</strong> Stimuli — bodily deception (Darkfield, i-Ride).</span></div>
+        <div class="method-item"><span class="method-num">02</span><span><strong>Challenge:</strong> Action / Flow states (Larp, The Agency).</span></div>
+        <div class="method-item"><span class="method-num">03</span><span><strong>Imaginative:</strong> Lore &amp; Narrative absorption (SIGNA, Rift).</span></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div>Synthesis: Ermi, Mäyrä, Pine &amp; Gilmore</div>
+  <div class="footer-right">
+    <span>Creative Tech Dashboard</span>
+    <span class="accent">2024 Build</span>
+  </div>
+</footer>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const examples = [
+  { name:'Brogent Flying Theatre',      realm:'aesthetic',     type:'Sensory Immersion',         url:'https://youtu.be/UyOjpUaitmo?si=kWX5HUEx1Qb4i4pR',        description:'Pure sensory engineering: g-forces, wind, and scent. The body is deceived by motion-base technology.',               tags:['4D','Motion','Large Scale'] },
+  { name:'Darkfield (FLIGHT)',          realm:'aesthetic',     type:'Sensory Immersion',         url:'https://www.darkfield.live/flight',                          description:'Total darkness and binaural audio. Sensory isolation that constructs a paralyzing sense of reality.',              tags:['Audio','Darkness','Container'] },
+  { name:'The Sphere (Vegas)',          realm:'aesthetic',     type:'Spatial Immersion',         url:'https://www.youtube.com/watch?v=tSLfZ4yL1m8',              description:'Maximum scale and resolution. A space that completely dominates the entire field of vision.',                     tags:['Architecture','LED','Scale'] },
+  { name:'Teamlab',                     realm:'aesthetic',     type:'Sensory / Spatial',         url:'https://www.youtube.com/watch?v=0gpwcaNyIrY',              description:'Interactive ecosystems of light. The boundary between body and artwork dissolves entirely.',                       tags:['Projection','Digital Art'] },
+  { name:'SSI: CIRCADIAN',             realm:'aesthetic',     type:'Sensory Immersion',         url:'https://spatialsoundinstitute.com/CIRCADIAN-2015',          description:'An investigation into spatial sound and its direct influence on human biorhythm.',                               tags:['Soundscape','Research'] },
+  { name:'Stockhausen Kugelauditorium',realm:'aesthetic',     type:'Sensory Immersion',         url:'https://youtu.be/-DtLKZLol4A?si=4ULpbARGU902Bjz0',        description:'A spherical concert hall. Sound arriving from every direction — a pioneer of 3D Audio.',                         tags:['History','Audio-3D'] },
+  { name:'Ryoji Ikeda',                realm:'aesthetic',     type:'Sensory Immersion',         url:'https://youtu.be/jCR7KJQtwGE?si=h_iGQiUvvKwNVp85',       description:'Extreme data minimalism transformed into an assault of sound and light on the senses.',                          tags:['Data','Noise','Visuals'] },
+  { name:'Janet Cardiff (Audio Walk)', realm:'aesthetic',     type:'Spatial Immersion',         url:'https://www.youtube.com/watch?v=38ORiaia9r8',              description:'Layering a new sonic reality onto a physical walk. Intimate first-person narration in real space.',               tags:['Audio-Walk','Narrative'] },
+  { name:'Punchdrunk (Sleep No More)', realm:'entertainment', type:'Imaginative Immersion',     url:'https://youtu.be/FEu15iabj2w?si=UhP4lZwJfdhpG2iX',       description:'You are a ghost inside the story. You absorb the lore through free exploration of the set.',                      tags:['Theatre','Site-Specific'] },
+  { name:'The Rift',                   realm:'entertainment', type:'Imaginative Immersion',     url:'https://www.instagram.com/p/BMbYAjclgbM/',                 description:'Passive yet deep absorption into a dark, meticulously designed narrative world.',                                tags:['Dark Narrative','Social Media'] },
+  { name:'SIGNA (The 13th Year)',      realm:'entertainment', type:'Imaginative Immersion',     url:'https://vimeo.com/715184237',                               description:'An extraordinarily detailed world where the line between actor and character ceases to exist.',                   tags:['Hyper-realism','Long-form'] },
+  { name:'Rimini Protokoll (Walks)',   realm:'educational',   type:'Challenge-based Immersion', url:'https://youtu.be/vz9pOrim_08?si=_LD_u9YCoZZW2u1H',        description:'The participant as researcher of social structures. The act of walking becomes a critical gesture.',             tags:['Documentary','Urban'] },
+  { name:'The Agency: Quality Time',  realm:'educational',   type:'Challenge-based / Agentic', url:'https://www.postpragmaticsolutions.com/qualitytime',        description:'Interactive analysis of capitalism and human relationships through live performance and roleplay.',              tags:['Performative','Theory'] },
+  { name:'Gothic Larp',               realm:'escapist',      type:'Agentic Immersion',         url:'https://youtu.be/fUj0BkXEw5c?si=AyMelC6ypQGMzWqJ&t=686', description:'Full agency. Your choices in the Old Camp build both the story and the cage that traps you.',                    tags:['Roleplay','Fantasy','Agency'] },
+  { name:'Secret Cinema',             realm:'escapist',      type:'Agentic / Spatial',         url:'https://youtu.be/vz9pOrim_08?si=_LD_u9YCoZZW2u1H',        description:'A film you play a part in. Costumes, quests, and physical presence inside the screenplay.',                     tags:['Cinema','Event','Costume'] },
+  { name:'Medusa Bionic Rise',        realm:'escapist',      type:'Agentic / Sensory',         url:'https://youtu.be/XF-0JPL56so?si=gHOOKwqLMlV_3Hmd&t=41',  description:'Total escapist performance. Futurism, cult ritual, and radical choices made by the participant.',               tags:['Future','Cult','Intense'] },
+];
+
+// ── INLINE SVG ICONS — zero external dependency ───────────────────────────────
+function svgIcon(name, size, color) {
+  const s = size, c = color;
+  const icons = {
+    eye:          `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+    zap:          `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+    brain:        `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-1.14"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-1.14"/></svg>`,
+    play:         `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>`,
+    target:       `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
+    arrowUpRight: `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>`,
+    externalLink: `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
+    info:         `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`,
+    layers:       `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>`,
+  };
+  return icons[name] || '';
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+const glowGradient = {
+  aesthetic:     'linear-gradient(135deg,#f59e0b,#f97316)',
+  escapist:      'linear-gradient(135deg,#f43f5e,#9333ea)',
+  educational:   'linear-gradient(135deg,#10b981,#0ea5e9)',
+  entertainment: 'linear-gradient(135deg,#3b82f6,#06b6d4)',
+};
+
+function typeIcon(type) {
+  if (type.includes('Sensory'))     return svgIcon('eye',    12, '#f59e0b');
+  if (type.includes('Agentic'))     return svgIcon('zap',    12, '#f43f5e');
+  if (type.includes('Imaginative')) return svgIcon('brain',  12, '#3b82f6');
+  return svgIcon('target', 12, '#10b981');
+}
+
+function realmIconName(realm) {
+  return { aesthetic:'eye', escapist:'zap', educational:'brain', entertainment:'play' }[realm] || 'target';
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let activeFilter = 'all';
+let selectedName = null;
+
+// ── RENDER CARDS ──────────────────────────────────────────────────────────────
+function renderCards() {
+  const grid = document.getElementById('cards-grid');
+  const list = activeFilter === 'all' ? examples : examples.filter(e => e.realm === activeFilter);
+
+  grid.innerHTML = list.map(ex => `
+    <div class="card${selectedName === ex.name ? ' selected' : ''}" data-name="${ex.name}">
+      <div class="card-glow" style="background:${glowGradient[ex.realm]}"></div>
+      <div class="card-header">
+        <span class="realm-badge ${ex.realm}">${ex.realm}</span>
+        <a href="${ex.url}" target="_blank" rel="noopener noreferrer"
+           class="ext-link" onclick="event.stopPropagation()" title="Open reference">
+          ${svgIcon('arrowUpRight', 16, 'currentColor')}
+        </a>
+      </div>
+      <div class="card-title">${ex.name}</div>
+      <div class="card-type">${typeIcon(ex.type)} ${ex.type}</div>
+      <div class="chips">${ex.tags.map(t => `<span class="chip">${t}</span>`).join('')}</div>
+    </div>
+  `).join('');
+
+  grid.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', () => {
+      selectedName = card.dataset.name;
+      renderCards();
+      renderPanel();
+    });
+  });
+}
+
+// ── RENDER PANEL ──────────────────────────────────────────────────────────────
+function renderPanel() {
+  const placeholder = document.getElementById('panel-placeholder');
+  const content     = document.getElementById('panel-content');
+
+  if (!selectedName) {
+    placeholder.style.display = 'flex';
+    content.classList.remove('visible');
+    content.innerHTML = '';
+    return;
+  }
+
+  const ex = examples.find(e => e.name === selectedName);
+  if (!ex) return;
+
+  placeholder.style.display = 'none';
+  content.innerHTML = `
+    <div class="panel-head">
+      <div class="icon-wrap ${ex.realm}">${svgIcon(realmIconName(ex.realm), 24, '#fff')}</div>
+      <div>
+        <div class="panel-title">${ex.name}</div>
+        <div class="panel-realm">${ex.realm} Experience</div>
+      </div>
+    </div>
+    <div class="analysis-box">
+      <div class="label-row">${svgIcon('info', 13, 'currentColor')} Analysis</div>
+      <p class="analysis-text">"${ex.description}"</p>
+    </div>
+    <div class="engine-label">${svgIcon('target', 13, 'currentColor')} Immersion Engine</div>
+    <div class="engine-value">${ex.type}</div>
+    <a href="${ex.url}" target="_blank" rel="noopener noreferrer" class="open-btn">
+      OPEN CASE STUDY ${svgIcon('externalLink', 17, 'currentColor')}
+    </a>
+  `;
+  // Trigger animation
+  content.classList.remove('visible');
+  requestAnimationFrame(() => content.classList.add('visible'));
+}
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeFilter = btn.dataset.filter;
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedName = null;
+    renderCards();
+    renderPanel();
+  });
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderCards();
+renderPanel();
+</script>
+</body>
+</html>
