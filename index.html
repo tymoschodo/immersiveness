@@ -487,14 +487,8 @@
 <!-- Main -->
 <main>
   <header>
-    <div class="tag-badge">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      SYSTEM SYNTHESIS V.2.0
-    </div>
     <h1>Experience Immersion Matrix</h1>
-    <p class="subtitle">
-      Mapping the 4 experience realms of <strong style="color:#fff;">Pine &amp; Gilmore</strong> onto the immersion mechanics of <strong style="color:#fff;">Ermi &amp; Mäyrä</strong>.
-    </p>
+    <p class="subtitle">four experience realms x immersion mechanics</p>
   </header>
 
   <div class="layout-grid">
@@ -524,10 +518,7 @@
 
 <footer>
   <div>Synthesis: Ermi, Mäyrä, Pine &amp; Gilmore</div>
-  <div class="footer-right">
-    <span>Creative Tech Dashboard</span>
-    <span class="accent">2024 Build</span>
-  </div>
+  <div>&copy; Tymoteusz Schodowski, 2026. All rights reserved.</div>
 </footer>
 
 <script>
@@ -644,6 +635,17 @@ function renderPanel() {
   if (!ex) return;
 
   placeholder.style.display = 'none';
+
+  let btns;
+  if (ex.url2) {
+    btns = '<div style="display:flex;gap:8px;">'
+      + '<a href="' + ex.url  + '" target="_blank" rel="noopener noreferrer" class="open-btn" style="flex:1;">REF 1 ' + svgIcon('externalLink', 15, 'currentColor') + '</a>'
+      + '<a href="' + ex.url2 + '" target="_blank" rel="noopener noreferrer" class="open-btn" style="flex:1;">REF 2 ' + svgIcon('externalLink', 15, 'currentColor') + '</a>'
+      + '</div>';
+  } else {
+    btns = '<a href="' + ex.url + '" target="_blank" rel="noopener noreferrer" class="open-btn">OPEN CASE STUDY ' + svgIcon('externalLink', 17, 'currentColor') + '</a>';
+  }
+
   content.innerHTML = `
     <div class="panel-head">
       <div class="icon-wrap ${ex.realm}">${svgIcon(realmIconName(ex.realm), 24, '#fff')}</div>
@@ -658,18 +660,7 @@ function renderPanel() {
     </div>
     <div class="engine-label">${svgIcon('target', 13, 'currentColor')} Immersion Engine</div>
     <div class="engine-value">${ex.type}</div>
-    ${ex.url2 ? `
-    <div style="display:flex;gap:8px;margin-bottom:0;">
-      <a href="${ex.url}" target="_blank" rel="noopener noreferrer" class="open-btn" style="flex:1;">
-        REF 1 ${svgIcon('externalLink', 15, 'currentColor')}
-      </a>
-      <a href="${ex.url2}" target="_blank" rel="noopener noreferrer" class="open-btn" style="flex:1;">
-        REF 2 ${svgIcon('externalLink', 15, 'currentColor')}
-      </a>
-    </div>` : `
-    <a href="${ex.url}" target="_blank" rel="noopener noreferrer" class="open-btn">
-      OPEN CASE STUDY ${svgIcon('externalLink', 17, 'currentColor')}
-    </a>`}
+    ${btns}
   `;
   // Trigger animation
   content.classList.remove('visible');
